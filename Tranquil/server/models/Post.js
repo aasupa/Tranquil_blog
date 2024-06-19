@@ -26,6 +26,17 @@ const postSchema = mongoose.Schema(
       type: Array,
       default: [],
     },
+    viewCount: {
+      type: Number,
+      default: 0
+    },
+    tags: {
+      type: [String],
+      default: []
+    },
+    recommended: {
+      type: Boolean,
+    },
   },
   { timestamps: true }
 );

@@ -11,12 +11,14 @@ import { fileURLToPath } from "url";
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
 import postRoutes from "./routes/posts.js";
+import recommenderRoutes from "./routes/recommender.js";
 import { register } from "./controllers/auth.js";
 import { createPost } from "./controllers/posts.js";
 import { verifyToken } from "./middleware/auth.js";
 import User from "./models/User.js";
 import Post from "./models/Post.js";
 import { users, posts } from "./data/index.js";
+import { addDocuments, updateUserInteractions, getHybridRecommendations } from "./Recommender_Module.js";
 
 /* CONFIGURATIONS */
 const __filename = fileURLToPath(import.meta.url);
@@ -51,6 +53,34 @@ app.post("/posts", verifyToken, upload.single("picture"), createPost);
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/posts", postRoutes);
+app.use("/api/recommend", recommenderRoutes);
+
+app.get('/', (req, res) => {
+  res.send('API is running...');
+});
+
+app.get('/api/recommend/:userId', async (req, res) => {
+  const {userId} = req.params;
+  try {
+      const recommendations = await getHybridRecommendations(userId);
+      res.json(recommendations);
+      
+  } catch (error) {
+    console.error('Error fetching recommendations', error);
+      res.status(500).send('Error setting up recommender system');
+  }
+});
+app.get('/api/recommender/setup', async (req, res) => {
+  try {
+      const posts = await Post.find();
+      addDocuments(posts);
+      res.send('Recommender system setup completed.');
+  } catch (error) {
+      res.status(500).send('Error setting up recommender system');
+  }
+});
+
+
 
 /* MONGOOSE SETUP */
 const PORT = process.env.PORT;
@@ -62,8 +92,14 @@ mongoose
   .then(() => {
     app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
 
+    Post.find().then(posts => {
+      addDocuments(posts);
+    });
+
     /* ADD DATA ONE TIME */
     // User.insertMany(users);
     // Post.insertMany(posts);
   })
   .catch((error) => console.log(`${error} did not connect`));
+
+  
