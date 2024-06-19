@@ -56,6 +56,11 @@ const sortedResults = results.sort((a, b) => b.score - a.score).slice(0, topN);
 }
 
 export function updateUserInteractions(userId, postId) {
+
+if (!userId || !postId) {
+    console.error(`Invalid userId (${userId}) or postId (${postId})`);
+    return;
+}
 if (!userInteractions[userId]) {
 userInteractions[userId] = {};
 }
@@ -71,10 +76,7 @@ const similarities = {};
 
 Object.keys(userInteractions).forEach(otherUserId => {
 if (otherUserId !== userId) {
-const similarity = cosineSimilarity(
-Object.values(userInteractions[userId]),
-Object.values(userInteractions[otherUserId])
-);
+const similarity = calculateCosineSimilarity(userId, otherUserId);
 similarities[otherUserId] = similarity;
 }
 });
@@ -82,13 +84,28 @@ similarities[otherUserId] = similarity;
 const sortedSimilarities = Object.entries(similarities).sort((a, b) => b[1] - a[1]);
 const recommendations = {};
 
+// Get topN most similar users and generate recommendations
 sortedSimilarities.slice(0, topN).forEach(([otherUserId]) => {
   Object.keys(userInteractions[otherUserId]).forEach(postId => {
-    if (!userInteractions[userId][postId]) {
-      recommendations[postId] = (recommendations[postId] || 0) + 1;
-    }
+      // Ensure the current user hasn't interacted with the post
+      if (!userInteractions[userId][postId]) {
+          recommendations[postId] = (recommendations[postId] || 0) + 1;
+      }
   });
 });
+
+
+
+// sortedSimilarities.slice(0, topN).forEach(([otherUserId]) => {
+//   Object.keys(userInteractions[otherUserId]).forEach(postId => {
+//     //user le post maa interact garexaina vanera ensure garney
+//     if (!userInteractions[userId][postId]) {
+//       recommendations[postId] = (recommendations[postId] || 0) + 1;
+//     }
+//   });
+// });
+
+
 
 const sortedRecommendations = Object.entries(recommendations)
         .sort((a, b) => b[1] - a[1])
@@ -97,6 +114,26 @@ const sortedRecommendations = Object.entries(recommendations)
     console.log("Collaborative recommendations:", sortedRecommendations);
     return sortedRecommendations;
 
+}
+
+function calculateCosineSimilarity(userId, otherUserId) {
+  const interactions1 = Object.values(userInteractions[userId]|| {});
+  const interactions2 = Object.values(userInteractions[otherUserId] || {});
+
+  // Calculate dot product
+  let dotProduct = 0;
+  for (let i = 0; i < interactions1.length; i++) {
+      dotProduct += interactions1[i] * interactions2[i];
+  }
+
+  // Calculate magnitudes
+  const magnitude1 = Math.sqrt(interactions1.reduce((sum, x) => sum + x * x, 0));
+  const magnitude2 = Math.sqrt(interactions2.reduce((sum, x) => sum + x * x, 0));
+
+  // Calculate cosine similarity (handle division by zero)
+  const similarity = magnitude1 > 0 && magnitude2 > 0 ? dotProduct / (magnitude1 * magnitude2) : 0;
+
+  return similarity;
 }
 
 export function getHybridRecommendations(userId, topN = 5) {
