@@ -70,51 +70,49 @@ console.log("Current user interactions:", userInteractions);
 }
 
 export function getCollaborativeRecommendations(userId, topN = 5) {
-if (!userInteractions[userId]) return [];
-
-const similarities = {};
-
-Object.keys(userInteractions).forEach(otherUserId => {
-if (otherUserId !== userId) {
-const similarity = calculateCosineSimilarity(userId, otherUserId);
-similarities[otherUserId] = similarity;
-}
-});
-
-const sortedSimilarities = Object.entries(similarities).sort((a, b) => b[1] - a[1]);
-const recommendations = {};
-
-// Get topN most similar users and generate recommendations
-sortedSimilarities.slice(0, topN).forEach(([otherUserId]) => {
-  Object.keys(userInteractions[otherUserId]).forEach(postId => {
-      // Ensure the current user hasn't interacted with the post
-      if (!userInteractions[userId][postId]) {
-          recommendations[postId] = (recommendations[postId] || 0) + 1;
-      }
+  if (!userInteractions[userId]){
+    console.log(`User ${userId} has no recorded interactions.`);
+   return [];
+  }
+  const similarities = {};
+  
+  Object.keys(userInteractions).forEach(otherUserId => {
+  if (otherUserId !== userId) {
+  const similarity = calculateCosineSimilarity(userId, otherUserId);
+  similarities[otherUserId] = similarity;
+  }
   });
-});
-
-
-
-// sortedSimilarities.slice(0, topN).forEach(([otherUserId]) => {
-//   Object.keys(userInteractions[otherUserId]).forEach(postId => {
-//     //user le post maa interact garexaina vanera ensure garney
-//     if (!userInteractions[userId][postId]) {
-//       recommendations[postId] = (recommendations[postId] || 0) + 1;
-//     }
-//   });
-// });
-
-
-
-const sortedRecommendations = Object.entries(recommendations)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, topN)
-        .map(([postId]) => postId);
-    console.log("Collaborative recommendations:", sortedRecommendations);
-    return sortedRecommendations;
-
-}
+  
+  const sortedSimilarities = Object.entries(similarities).sort((a, b) => b[1] - a[1]);
+  const recommendations = {};
+  
+  // Get topN most similar users and generate recommendations
+  sortedSimilarities.slice(0, topN).forEach(([otherUserId, similarity]) => {
+  Object.keys(userInteractions[otherUserId]).forEach(postId => {
+  // Ensure the current user hasn't interacted with the post
+  if (!userInteractions[userId][postId]) {
+  recommendations[postId] = (recommendations[postId] || 0) + similarity;
+  }
+  });
+  });
+  
+  // sortedSimilarities.slice(0, topN).forEach(([otherUserId]) => {
+  // Object.keys(userInteractions[otherUserId]).forEach(postId => {
+  // //user le post maa interact garexaina vanera ensure garney
+  // if (!userInteractions[userId][postId]) {
+  // recommendations[postId] = (recommendations[postId] || 0) + 1;
+  // }
+  // });
+  // });
+  
+  const sortedRecommendations = Object.entries(recommendations)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, topN)
+  .map(([postId]) => postId);
+  console.log("Collaborative recommendations:", sortedRecommendations);
+  return sortedRecommendations;
+  
+  } 
 
 function calculateCosineSimilarity(userId, otherUserId) {
   const interactions1 = Object.values(userInteractions[userId]|| {});

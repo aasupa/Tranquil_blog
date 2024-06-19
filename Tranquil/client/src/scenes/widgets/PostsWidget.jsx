@@ -33,15 +33,30 @@ const PostsWidget = ({ userId, isProfile = false }) => {
   };
 
   const getRecommendedPosts = async () => {
-    const response = await fetch(
-      `http://localhost:3001/api/recommend/${userId}`, // Adjust the endpoint as needed
-      {
-        method: "GET",
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    const data = await response.json();
-    setRecommendedPosts(data);
+
+    try {
+      const response = await fetch(
+          `http://localhost:3001/api/recommend/${userId}`,
+          {
+              method: "GET",
+              headers: { Authorization: `Bearer ${token}` },
+          }
+      );
+      const data = await response.json();
+      setRecommendedPosts(data); // Update state with fetched data
+  } catch (error) {
+      console.error("Error fetching recommended posts:", error);
+  }
+
+    // const response = await fetch(
+    //   `http://localhost:3001/api/recommend/${userId}`, // Adjust the endpoint as needed
+    //   {
+    //     method: "GET",
+    //     headers: { Authorization: `Bearer ${token}` },
+    //   }
+    // );
+    // const data = await response.json();
+    // setRecommendedPosts(data);
   };
 
   useEffect(() => {
@@ -89,7 +104,8 @@ const PostsWidget = ({ userId, isProfile = false }) => {
           />
         )
       )}
-      <Recommendations posts={recommendedPosts} /> {/* Display recommended posts */}
+      <Recommendations userId={userId} />
+   { /*  <Recommendations posts={recommendedPosts} /> */}{/* Display recommended posts */}
     </>
   );
 };

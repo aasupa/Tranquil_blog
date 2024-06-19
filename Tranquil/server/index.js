@@ -59,10 +59,10 @@ app.get('/', (req, res) => {
   res.send('API is running...');
 });
 
-app.get('/api/recommend/:userId', async (req, res) => {
+app.get('/api/recommend/:userId',  (req, res) => {
   const {userId} = req.params;
   try {
-      const recommendations = await getHybridRecommendations(userId);
+      const recommendations =  getHybridRecommendations(userId);
       res.json(recommendations);
       
   } catch (error) {
