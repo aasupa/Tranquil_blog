@@ -4,14 +4,14 @@ import {
   FavoriteOutlined,
   ShareOutlined,
 } from "@mui/icons-material";
-import { Box, Divider, IconButton, Typography, useTheme } from "@mui/material";
+import { Box, Divider, IconButton, Typography, useTheme, TextField, Button } from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Friend from "components/Friend";
 import WidgetWrapper from "components/WidgetWrapper";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "state";
-import Recommendations from "components/Recommendations";
+//import Recommendations from "components/Recommendations";
 
 const PostWidget = ({
   postId,
@@ -25,6 +25,9 @@ const PostWidget = ({
   comments,
 }) => {
   const [isComments, setIsComments] = useState(false);
+  ///added
+  const [newComment, setNewComment] = useState(""); // paxi added.
+  //added
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
   const loggedInUserId = useSelector((state) => state.user._id);
@@ -47,6 +50,32 @@ const PostWidget = ({
     const updatedPost = await response.json();
     dispatch(setPost({ post: updatedPost }));
   };
+
+
+const postComment = async () => {
+    if (!newComment.trim()) return;
+      try{
+    const response = await fetch(`http://localhost:3001/posts/${postId}/comment`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId: loggedInUserId, text: newComment }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.statusText}`);
+    }
+
+    const updatedPost = await response.json();
+    dispatch(setPost({ post: updatedPost }));
+    setNewComment("");
+  }catch(error){
+    console.error("failed to post comment:", error)
+  }
+  };
+
 
   return (
     <WidgetWrapper m="2rem 0">
@@ -99,12 +128,30 @@ const PostWidget = ({
             <Box key={`${name}-${i}`}>
               <Divider />
               <Typography sx={{ color: main, m: "0.5rem 0", pl: "1rem" }}>
-                {comment}
+                {comment.text}
               </Typography>
             </Box>
           ))}
           <Divider />
-        </Box>
+        <Box mt ="1rem">
+        <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="Write a comment..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              sx={{ mb: "1rem" }}
+        />
+        <Button
+              variant="contained"
+              color="primary"
+              onClick={postComment}
+              disabled={!newComment.trim()}
+            >
+              Post Comment
+            </Button>
+            </Box>
+            </Box>
       )}
     </WidgetWrapper>
   );
