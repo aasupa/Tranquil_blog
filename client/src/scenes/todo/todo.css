@@ -4,7 +4,7 @@
 }
 
 .container {
-    background-color: white;
+    background-color: light;
     width: 100%;
     min-height: 100vh;
     display: flex;
@@ -28,8 +28,9 @@
 .header {
     color: darkslateblue;
     text-align: center;
-    margin: 20px 0;
+    margin: 10px 0;
     font-size: 35px;
+    
 }
 
 .task-input {
@@ -100,7 +101,7 @@
 .list {
     width:280px;
     max-width: 280px;
-    background-color: lightseagreen;
+    background-color: rgb(90, 148, 145);
     border: none;
     border-radius: 10px;
     color: black;
