@@ -24,8 +24,11 @@ const postSchema = mongoose.Schema(
     },
     comments: {
       userId: String,
+      username: String,
+      firstName: String,
+      lastName: String,
       text: String,
-      createdAt: { type: Date, default: Date.now },
+      createdAt: { type: Date, default: new Date() },
       type: Array,
       default: [],
     },

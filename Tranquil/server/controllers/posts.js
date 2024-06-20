@@ -1,7 +1,7 @@
 import { updateUserInteractions } from "../Recommender_Module.js";
 import Post from "../models/Post.js";
 import User from "../models/User.js";
-
+import { format } from "date-fns";
 /* CREATE */
 export const createPost = async (req, res) => {
   try {
@@ -87,7 +87,19 @@ export const addComment = async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    post.comments.push({ userId, text });
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const newComment = {
+      userId,
+      username: `${user.firstName} ${user.lastName}`,
+      text,
+      createdAt: new Date(),
+    };
+
+    post.comments.push({newComment});
     const updatedPost = await post.save();
 
     res.status(200).json(updatedPost);

@@ -12,7 +12,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "state";
 //import Recommendations from "components/Recommendations";
-
+import { format } from 'date-fns';
 const PostWidget = ({
   postId,
   postUserId,
@@ -77,6 +77,28 @@ const postComment = async () => {
   };
 
 
+  const formatDate = (dateString) => {
+    if (!dateString) return ''; // Handle case where dateString is falsy
+  
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return ''; // Invalid date string, return empty string or handle appropriately
+      }
+      return format(date, 'MMMM dd, yyyy hh:mm a'); // Adjust the format as per your preference
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return ''; // Handle unexpected errors
+    }
+  };
+
+  // const formatDate = (dateString) => {
+  //   const date = new Date(dateString);
+  //   return format(date, 'MMMM dd, yyyy hh:mm a');
+  //   //return new Date(dateString).toLocaleDateString(undefined, options);
+  // };
+
+
   return (
     <WidgetWrapper m="2rem 0">
       <Friend
@@ -125,8 +147,12 @@ const postComment = async () => {
       {isComments && (
         <Box mt="0.5rem">
           {comments.map((comment, i) => (
-            <Box key={`${name}-${i}`}>
+            //<Box key={`${name}-${i}`}>
+            <Box key={`${comment.userId}-${i}`} sx={{ mb: "1rem" }}>
               <Divider />
+              <Typography sx={{ color: main, m: "0.5rem 0", pl: "1rem" }}>
+                <strong>{comment.username}</strong> - {formatDate(comment.createdAt)}
+              </Typography>
               <Typography sx={{ color: main, m: "0.5rem 0", pl: "1rem" }}>
                 {comment.text}
               </Typography>
