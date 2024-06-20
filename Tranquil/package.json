@@ -1,9 +1,0 @@
-{
-  "dependencies": {
-    "axios": "^1.7.2",
-    "compromise": "^14.13.0",
-    "cosine-similarity": "^1.0.1",
-    "natural": "^7.0.6",
-    "stopword": "^3.0.1"
-  }
-}
